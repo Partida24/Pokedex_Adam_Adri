@@ -82,6 +82,24 @@ export function reproduirCrit(soundUrl) {
  *  - Afegir el <li> al contenidor amb appendChild.
  */
 // TODO: Implementa la lògica de l'exercici 1 seguint els requisits
+export function renderitzarLlistaNoms(llista) {
+    let llistaNoms = document.getElementById("pokemon-list");
+    if (!llistaNoms) {
+        return;
+    }
+    llistaNoms.innerHTML = "";
+    llista.forEach((p) => {
+        let llistaNova = document.createElement("li");
+        llistaNova.dataset.id = p.id.toString();
+        llistaNova.dataset.name = p.name;
+        llistaNova.dataset.url = p.url;
+        let strong = document.createElement("strong");
+        strong.textContent = p.formattedId;
+        llistaNova.appendChild(strong);
+        llistaNova.append(` - ${p.displayName}`);
+        llistaNoms.appendChild(llistaNova);
+    });
+}
 /**
  * EXERCICI 3
  * Renderitza la targeta de detall dins de <div id="pokemon-detail">.
@@ -104,7 +122,71 @@ export function reproduirCrit(soundUrl) {
  *  - El botó del crit només s'ha de pintar si pokemon.cryUrl no és null.
  *  - Un cop pintat l'HTML, afegeix el listener de clic al botó i crida reproduirCrit().
  */
-// TODO: Implementa la lògica de l'exercici 3 seguint els requisits
+export function renderitzarDetallCard(pokemon) {
+    const container = document.getElementById("pokemon-detail");
+    if (!container) {
+        return;
+    }
+    const tipusText = pokemon.types
+        // map --> transforma cada objeto PokemonType en su etiqueta --> Ej: ⚡ Elèctric
+        .map((tipus) => tipus.label)
+        // Join --> Une los elemetnos de la array en un único texto
+        .join(", ");
+    const estadistiquesHtml = pokemon.stats
+        .map(([nom, valor]) => {
+        return `
+            <div class="stat-box">
+                <span>${nom.toUpperCase()}</span>
+                <strong>${valor}</strong>
+            </div>
+        `;
+    })
+        .join("");
+    // El botón solamente aparece si existe una URL de sonido.
+    const botoCritHtml = pokemon.cryUrl
+        ? `
+            <button id="btn-play-cry" class="btn-cry">🔊 Escolta el crit</button>
+          `
+        : "";
+    // Sustituimos el placeholder por la tarjeta del Pokémon.
+    container.innerHTML = `
+        <div class="detail-card">
+            <h3>
+                ${pokemon.formattedId} - ${pokemon.displayName}
+            </h3>
+
+            <img
+                src="${pokemon.imageUrl}"
+                alt="${pokemon.displayName}"
+            >
+
+            ${botoCritHtml}
+
+            <p>
+                <strong>Pes:</strong>
+                ${pokemon.weightKg} kg
+            </p>
+
+            <p>
+                <strong>Tipus:</strong>
+                ${tipusText}
+            </p>
+
+            <div class="stats-grid">
+                ${estadistiquesHtml}
+            </div>
+        </div>
+    `;
+    // Recuperamos el botón y guardamos la URL del grito.
+    // El botón solo tendrá listener si ambos existen.
+    const botoCrit = document.getElementById("btn-play-cry");
+    const cryUrl = pokemon.cryUrl;
+    if (botoCrit && cryUrl) {
+        botoCrit.addEventListener("click", () => {
+            reproduirCrit(cryUrl);
+        });
+    }
+}
 /**
  * EXERCICI 4
  * Genera un botó per a cada tipus dins de <div id="type-filter-container">.

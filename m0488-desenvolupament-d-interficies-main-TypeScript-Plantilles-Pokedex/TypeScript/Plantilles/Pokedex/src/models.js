@@ -72,6 +72,44 @@ export const POKEMON_TYPES = {
  *   get url: retorna l'atribut privat corresponent.
  *   get formattedId: retorna l'atribut id en format "#025" (3 xifres, amb zeros a l'esquerra. Pista: padStart).
  */
+export class BasePokemon {
+    _id;
+    _name;
+    _url;
+    //Constructores
+    constructor(item) {
+        this._name = item.name; //Guarda nom
+        this._url = item.url; //Guarda url
+        let parts = this._url.split("/").filter(Boolean);
+        let idText = parts.pop();
+        this._id = Number(idText);
+    }
+    //Getters
+    get id() {
+        return this._id;
+    }
+    get name() {
+        return this._name;
+    }
+    get url() {
+        return this._url;
+    }
+    get formattedId() {
+        if (this._id < 10 && this._id > 0) {
+            return "#00" + this._id;
+        }
+        else if (this._id > 9 && this._id < 100) {
+            return "#0" + this._id;
+        }
+        else {
+            return "#" + this._id;
+        }
+    }
+    get displayName() {
+        return this._name.charAt(0).toUpperCase()
+            + this._name.slice(1).toLowerCase();
+    }
+}
 /**
  * EXERCICI 3: class DetailedPokemon
  *
@@ -108,4 +146,48 @@ export const POKEMON_TYPES = {
  *   get types: retorna un array d'objectes PokemonType
  *   get stats: retorna un array de type Stat
  */
+export class DetailedPokemon extends BasePokemon {
+    _weightKg;
+    _imageUrl;
+    _types;
+    _stats;
+    _cryUrl;
+    constructor(data, url) {
+        //const objecte : IPokeApiListItem = {name : data.name, url : url};
+        //super(objecte);
+        super({ name: data.name, url: url });
+        this._weightKg = data.weight / 10;
+        // Utiliza el valor de la izquierda, excepto cuando sea null o undefined
+        this._imageUrl = data.sprites.front_default ?? "";
+        // Intenta acceder a latest, pero solamente si cries existe.
+        this._cryUrl = data.cries?.latest || null;
+        this._types = data.types
+            // Transforma cada elemento de la API --> new PokemonType("electric","Elèctric","⚡","#a08000")
+            .map((t) => POKEMON_TYPES[t.type.name])
+            // filter --> Elimina posibles valores undefined.
+            .filter((type) => type !== undefined);
+        // Convertimos las estadísticas de la API
+        // en tuplas [nombre, valor].
+        this._stats = data.stats.map((s) => [
+            s.stat.name,
+            s.base_stat
+        ]);
+    }
+    // Getters //
+    get weightKg() {
+        return this._weightKg;
+    }
+    get imageUrl() {
+        return this._imageUrl;
+    }
+    get cryUrl() {
+        return this._cryUrl;
+    }
+    get types() {
+        return this._types;
+    }
+    get stats() {
+        return this._stats;
+    }
+}
 //# sourceMappingURL=models.js.map
