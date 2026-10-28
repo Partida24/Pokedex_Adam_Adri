@@ -6,6 +6,7 @@
 
 import * as Models from "./models.js";
 import * as Utils from "./utils.js";
+import {generarBotonsTipus} from "./utils.js";
 
 console.log("main.ts carregat correctament");
 
@@ -231,7 +232,9 @@ async function carregarDetallPokemon(
 // ==========================================================
 // EXERCICI 4: Botons de filtre per tipus
 // ==========================================================
-// TODO: Implementa la lògica de l'exercici 4 seguint els requisits
+
+Utils.generarBotonsTipus();
+
 
 
 
