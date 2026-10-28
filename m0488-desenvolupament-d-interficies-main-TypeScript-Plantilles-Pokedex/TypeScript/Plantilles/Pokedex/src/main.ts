@@ -46,6 +46,17 @@ async function carregarLlistaPokemon(): Promise<void>{
 
         Utils.renderitzarLlistaNoms(llistaPokemon);
 
+
+        document.querySelectorAll<HTMLButtonElement>(
+            "#type-filter-container .btn-type"
+        ).forEach((boto) => {
+            boto.classList.remove("active");
+        });
+
+        Utils.netejarCercador();
+        Utils.netejarDetallCard();
+
+
         Utils.amagarEstat();
 
     }catch (error: unknown){
@@ -241,4 +252,86 @@ Utils.generarBotonsTipus();
 // ==========================================================
 // EXERCICI 5: Filtrar la llista per tipus
 // ==========================================================
-// TODO: Implementa la lògica de l'exercici 5 seguint els requisits
+
+
+/**
+ * EXERCICI 5: Filtrar la llista per tipus
+ */
+
+let contenidorTipus = document.getElementById("type-filter-container") as HTMLDivElement | null;
+
+if (contenidorTipus) {
+
+    contenidorTipus.addEventListener("click", (event: MouseEvent) => {
+
+        let elementPremut = event.target;
+
+        if (!(elementPremut instanceof HTMLElement)) {
+            return;
+        }
+
+        const botoTipus = elementPremut.closest("button.btn-type") as HTMLButtonElement | null;
+
+        if (!botoTipus || !contenidorTipus.contains(botoTipus)) {
+            return;
+        }
+
+        let tipus = botoTipus.dataset.type;
+
+        if (!tipus) {
+            return;
+        }
+
+        contenidorTipus.querySelectorAll<HTMLButtonElement>(".btn-type")
+            .forEach((boto) => {
+                boto.classList.remove("active");
+            });
+
+        botoTipus.classList.add("active");
+
+        void carregarPokemonPerTipus(tipus);
+    });
+
+}
+
+async function carregarPokemonPerTipus(tipus: string): Promise<void> {
+
+    Utils.mostrarEstat("Carregant els Pokémon del tipus seleccionat...", "loading");
+
+    try {
+
+        let resposta = await fetch(
+            `https://pokeapi.co/api/v2/type/${tipus}`
+        );
+
+        let dades = (await resposta.json()) as Models.IPokeApiTypeResponse;
+
+        const pokemonFiltrats = dades.pokemon
+            .map((element) => new Models.BasePokemon(element.pokemon))
+            .filter((pokemon) => pokemon.id <= 151)
+            .sort((a, b) => a.id - b.id);
+
+        mapaPokemon.clear();
+
+        pokemonFiltrats.forEach((pokemon) => {
+            mapaPokemon.set(pokemon.id, pokemon);
+        });
+
+        Utils.renderitzarLlistaNoms(
+            Array.from(mapaPokemon.values())
+        );
+
+        Utils.netejarCercador();
+        Utils.netejarDetallCard();
+
+        // Amaguem el missatge d'estat.
+        Utils.amagarEstat();
+
+    } catch (error: unknown) {
+
+        Utils.mostrarEstat(
+            "No s'han pogut carregar els Pokémon d'aquest tipus.",
+            "error"
+        );
+    }
+}
